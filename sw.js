@@ -1,7 +1,7 @@
 /* Service Worker — CashBag
    Estratégia "network-first": com internet, sempre pega a versão mais nova;
    sem internet, usa a cópia salva (offline). Evita ficar preso em versão antiga. */
-const CACHE = 'cashbag-v14';
+const CACHE = 'cashbag-v15';
 const ASSETS = [
   './',
   './index.html',

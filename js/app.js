@@ -94,7 +94,7 @@ const somaGanhos = r => (r.ganhos||[]).reduce((s,g)=>s+num(g.valor),0);
 
 /* ================= ROTEADOR ================= */
 const routes = {};
-const ROUTE_ORDER = { painel:0, historico:1, novo:2, manutencao:3, orcamento:4 };
+const ROUTE_ORDER = { painel:0, historico:1, novo:2, manutencao:3, orcamento:4, habitos:5, tutorial:6 };
 let current = 'painel';
 let prevIndex = 0;
 function go(route){
@@ -899,6 +899,11 @@ function openGaragem(){
         <div class="drawer-sub">De motoboy para motoboy</div>
       </div>
       <nav class="drawer-list">
+        <button class="drawer-item" data-go="tutorial">
+          <span class="di-ico">✨</span>
+          <span class="di-tx"><strong>Tutorial & Apresentação</strong><small>Conheça tudo sobre o CashBag</small></span>
+          <span class="di-arrow">›</span>
+        </button>
         <button class="drawer-item" data-go="habitos">
           <span class="di-ico">🎯</span>
           <span class="di-tx"><strong>Metas & Hábitos</strong><small>Planner diário e hábitos</small></span>
@@ -1017,6 +1022,252 @@ function openPeriodoPopover(){
 }
 function closePeriodoPopover(){ const p=document.getElementById('perPop'); if(p) p.remove(); }
 document.getElementById('periodoBtn').onclick=openPeriodoPopover;
+
+/* ================= MÓDULO: Tutorial & Apresentação (Mobile & Touch) ================= */
+routes.tutorial = (root)=>{
+  let cur = 0;
+  const total = 6;
+  
+  root.innerHTML = `
+    <div class="tut-container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <button class="back-btn" id="backTut" style="margin:0">‹ Voltar ao Painel</button>
+        <span class="tut-tag" style="background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-glow)" id="tutStepBadge">1 de 6</span>
+      </div>
+
+      <div class="tut-carousel" id="tutCarousel">
+        <div class="tut-track" id="tutTrack">
+          
+          <!-- Slide 1 -->
+          <div class="tut-slide-card">
+            <div class="tut-slide-header">
+              <span class="tut-tag" style="background:rgba(254,242,0,0.15);color:#FEF200;border:1px solid rgba(254,242,0,0.3)">🟡 Bem-vindo</span>
+              <h2 class="tut-title">Conheça o CashBag.</h2>
+              <p class="tut-desc">O aplicativo definitivo para quem roda na rua. Feito <strong>de motoboy para motoboy</strong>, focado em lucro limpo, agilidade e controle total.</p>
+            </div>
+            <div class="tut-box" style="text-align:center;padding:22px 14px">
+              <div style="font-size:32px;font-weight:900;margin-bottom:8px">
+                <span class="cash cash-box" style="font-size:24px">Cash</span><span class="bag bag-text" style="font-size:24px">Bag</span><span class="logo-dot" style="font-size:28px">.</span>
+              </div>
+              <p class="hintline" style="color:var(--ink);font-weight:700;font-size:13px">Sem mensalidade · 100% Offline · Dados só no seu celular</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+                <div class="glass-card" style="padding:10px;text-align:center">
+                  <div style="font-size:18px">⚡</div>
+                  <div style="font-size:11px;font-weight:800">100% Offline</div>
+                </div>
+                <div class="glass-card" style="padding:10px;text-align:center">
+                  <div style="font-size:18px">📱</div>
+                  <div style="font-size:11px;font-weight:800">App no iPhone</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="tut-slide-card">
+            <div class="tut-slide-header">
+              <span class="tut-tag" style="background:var(--green-bg);color:var(--green);border:1px solid rgba(0,230,118,0.3)">📊 Painel Financeiro</span>
+              <h2 class="tut-title">Saiba o seu Lucro Real</h2>
+              <p class="tut-desc">Faturamento bruto não é dinheiro no bolso! O CashBag desconta automaticamente gasolina, manutenção e custos de rua para você ver o seu lucro líquido real.</p>
+            </div>
+            <div class="tut-box">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)">
+                <span style="font-size:12px;color:var(--muted);font-weight:700">SALDO LIMPO DO PERÍODO</span>
+                <span style="font-size:18px;font-weight:900;color:var(--green)">R$ 2.450,00</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="background:var(--card-2);padding:10px;border-radius:12px">
+                  <div style="font-size:11px;color:var(--muted)">MÉDIA / KM</div>
+                  <div style="font-size:15px;font-weight:800;color:#FEF200">R$ 2,85/km</div>
+                </div>
+                <div style="background:var(--card-2);padding:10px;border-radius:12px">
+                  <div style="font-size:11px;color:var(--muted)">MÉDIA / HORA</div>
+                  <div style="font-size:15px;font-weight:800;color:var(--accent)">R$ 34,20/h</div>
+                </div>
+              </div>
+              <p class="hintline">Acompanhe também os ganhos divididos por iFood, Rappi, Lalamove ou Particulares.</p>
+            </div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="tut-slide-card">
+            <div class="tut-slide-header">
+              <span class="tut-tag" style="background:var(--blue-bg);color:var(--blue);border:1px solid rgba(0,180,216,0.3)">🗒️ Lançamentos & Histórico</span>
+              <h2 class="tut-title">Registros em 15 Segundos</h2>
+              <p class="tut-desc">Cadastre com poucos toques no teclado da rua. O histórico usa cores visuais para você nunca misturar dinheiro da moto com contas da sua casa.</p>
+            </div>
+            <div class="tut-box" style="gap:8px">
+              <div class="rec moto" style="margin:0;padding:10px">
+                <div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px">
+                  <span>🏍️ Gasto da Moto</span>
+                  <span style="color:var(--green)">+ R$ 240,00</span>
+                </div>
+                <div style="font-size:11px;color:var(--muted)">Gasolina, corridas, horas e KM rodados</div>
+              </div>
+              <div class="rec pessoal" style="margin:0;padding:10px">
+                <div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px">
+                  <span>👤 Gasto Pessoal</span>
+                  <span style="color:var(--red)">- R$ 28,50</span>
+                </div>
+                <div style="font-size:11px;color:var(--muted)">Almoço, mercado, contas e farmácia</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 4 -->
+          <div class="tut-slide-card">
+            <div class="tut-slide-header">
+              <span class="tut-tag" style="background:var(--accent-bg);color:var(--accent);border:1px solid rgba(255,136,0,0.3)">🔧 Garagem & Manutenção</span>
+              <h2 class="tut-title">Simulador de Peças da Moto</h2>
+              <p class="tut-desc">O app calcula a vida útil estimada das peças (óleo, pneu, corrente, freios). Arraste a barra abaixo para testar:</p>
+            </div>
+            <div class="tut-box">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-weight:800;font-size:14px">🛢️ Óleo do Motor (1.000 km)</span>
+                <span class="pill ok" id="tutOleoStatus">OK</span>
+              </div>
+              <div class="kmbar" style="margin:4px 0">
+                <i id="tutOleoBar" style="width:50%"></i>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+                <span id="tutOleoKm">Rodou: 500 km</span>
+                <span id="tutOleoSim">KM atual: 15.500 km</span>
+              </div>
+              <input type="range" min="15000" max="16200" value="15500" id="tutSlider" style="width:100%;margin-top:6px">
+              <p class="hintline">Arraste a barra para a direita e veja o alerta mudar para Atenção e Vencido!</p>
+            </div>
+          </div>
+
+          <!-- Slide 5 -->
+          <div class="tut-slide-card">
+            <div class="tut-slide-header">
+              <span class="tut-tag" style="background:var(--green-bg);color:var(--green);border:1px solid rgba(0,230,118,0.3)">🧾 Orçamentos para Clientes</span>
+              <h2 class="tut-title">Preço Justo no WhatsApp</h2>
+              <p class="tut-desc">Cobre o valor correto das suas entregas particulares sem fazer conta de cabeça. O app gera um orçamento formatado pronto para enviar.</p>
+            </div>
+            <div class="tut-box">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px;font-weight:800">Orçamento: 14 km (Entrega Média)</span>
+                <span style="font-size:18px;font-weight:900;color:var(--green)">R$ 48,00</span>
+              </div>
+              <div style="background:rgba(0,0,0,0.5);border-radius:12px;padding:10px;font-size:11px;color:var(--muted);font-family:monospace;line-height:1.4">
+                *Orçamento de Entrega — CashBag*<br>
+                📍 Retirada: Centro<br>
+                🏁 Destino: Bairro Novo (14 km)<br>
+                💰 Total: R$ 48,00
+              </div>
+              <button class="btn green" style="padding:10px;font-size:13px" onclick="toast('Exemplo de envio direto para o WhatsApp!')">📲 Enviar no WhatsApp</button>
+            </div>
+          </div>
+
+          <!-- Slide 6 -->
+          <div class="tut-slide-card">
+            <div class="tut-slide-header">
+              <span class="tut-tag" style="background:rgba(254,242,0,0.15);color:#FEF200;border:1px solid rgba(254,242,0,0.3)">📱 Instalação no Celular</span>
+              <h2 class="tut-title">Use como App no iPhone</h2>
+              <p class="tut-desc">O CashBag é um aplicativo web progressivo (PWA). Ele não precisa ser baixado na App Store e funciona sem internet!</p>
+            </div>
+            <div class="tut-box" style="gap:10px">
+              <div style="display:flex;gap:10px;align-items:center">
+                <span style="font-size:24px">1️⃣</span>
+                <div style="font-size:12px">Abra o link oficial no <strong>Safari</strong> do iPhone.</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span style="font-size:24px">2️⃣</span>
+                <div style="font-size:12px">Toque no botão <strong>Compartilhar (⎘)</strong> na barra inferior.</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span style="font-size:24px">3️⃣</span>
+                <div style="font-size:12px">Escolha <strong>"Adicionar à Tela de Início"</strong> e confirme.</div>
+              </div>
+              <button class="btn primary" id="tutGoPainel" style="margin-top:6px">🚀 Ir para o Painel do App</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Navegação Inferior dos Slides -->
+      <div class="tut-nav">
+        <button class="tut-btn-nav" id="tutPrev">‹</button>
+        <div class="tut-dots" id="tutDots">
+          <span class="tut-dot active" data-i="0"></span>
+          <span class="tut-dot" data-i="1"></span>
+          <span class="tut-dot" data-i="2"></span>
+          <span class="tut-dot" data-i="3"></span>
+          <span class="tut-dot" data-i="4"></span>
+          <span class="tut-dot" data-i="5"></span>
+        </div>
+        <button class="tut-btn-nav" id="tutNext">›</button>
+      </div>
+    </div>`;
+
+  // Listeners e Lógica dos Slides
+  const track = document.getElementById('tutTrack');
+  const badge = document.getElementById('tutStepBadge');
+  const dots = document.querySelectorAll('.tut-dot');
+
+  function updateSlide(idx){
+    cur = Math.max(0, Math.min(total - 1, idx));
+    track.style.transform = `translateX(-${cur * 100}%)`;
+    if(badge) badge.textContent = `${cur + 1} de ${total}`;
+    dots.forEach((d, i)=> d.classList.toggle('active', i === cur));
+  }
+
+  document.getElementById('tutPrev').onclick = () => updateSlide(cur - 1);
+  document.getElementById('tutNext').onclick = () => updateSlide(cur + 1);
+  dots.forEach(d => d.onclick = () => updateSlide(Number(d.dataset.i)));
+  document.getElementById('backTut').onclick = () => go('painel');
+  document.getElementById('tutGoPainel').onclick = () => go('painel');
+
+  // Suporte a Touch Swipe (Arrastar para os lados no celular)
+  const carousel = document.getElementById('tutCarousel');
+  let startX = 0, startY = 0;
+  carousel.addEventListener('touchstart', (e)=>{
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+
+  carousel.addEventListener('touchend', (e)=>{
+    const diffX = startX - e.changedTouches[0].clientX;
+    const diffY = startY - e.changedTouches[0].clientY;
+    if(Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35){
+      if(diffX > 0) updateSlide(cur + 1);
+      else updateSlide(cur - 1);
+    }
+  }, {passive:true});
+
+  // Simulador de KM no Slide 4
+  const slider = document.getElementById('tutSlider');
+  if(slider){
+    slider.oninput = (e)=>{
+      const val = Number(e.target.value);
+      const rodado = val - 15000;
+      const pct = Math.min(100, Math.round((rodado / 1000) * 100));
+      const bar = document.getElementById('tutOleoBar');
+      const status = document.getElementById('tutOleoStatus');
+      const kmTxt = document.getElementById('tutOleoKm');
+      const simTxt = document.getElementById('tutOleoSim');
+      
+      if(bar) bar.style.width = pct + '%';
+      if(kmTxt) kmTxt.textContent = `Rodou: ${rodado} km`;
+      if(simTxt) simTxt.textContent = `KM atual: ${val.toLocaleString('pt-BR')} km`;
+      
+      if(status){
+        if(pct >= 100){
+          status.className = 'pill end'; status.textContent = 'Vencido!';
+          bar.className = 'over';
+        } else if(pct >= 80){
+          status.className = 'pill warn'; status.textContent = 'Atenção';
+          bar.className = 'warn';
+        } else {
+          status.className = 'pill ok'; status.textContent = 'OK';
+          bar.className = '';
+        }
+      }
+    };
+  }
+};
 
 /* ================= Backup / Restauração (JSON) ================= */
 function exportBackup(){
