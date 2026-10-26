@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CashBag — Apresentação Interativa Parallax</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #090A0F;
+      color: #F8FAFC;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      perspective: 1000px;
+    }
+
+    /* Cores da Marca */
+    :root {
+      --cb-yellow: #FEF200;
+      --cb-dark: #090A0F;
+      --cb-card: #12141D;
+      --cb-card-2: #191B26;
+      --cb-green: #00E676;
+      --cb-red: #FF3366;
+      --cb-blue: #00B4D8;
+    }
+
+    /* Container de Slides */
+    .slide-deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.94) translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 24px;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+
+    .slide.prev {
+      transform: scale(1.05) translateY(-50px);
+      opacity: 0;
+    }
+
+    /* Parallax Layers */
+    .parallax-layer {
+      transition: transform 0.15s ease-out;
+      will-change: transform;
+    }
+
+    /* Glass Cards */
+    .glass-panel {
+      background: rgba(18, 20, 29, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+    }
+
+    .glass-card {
+      background: linear-gradient(155deg, rgba(25, 27, 38, 0.8) 0%, rgba(18, 20, 29, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      transition: all 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .glass-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(254, 242, 0, 0.35);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(254, 242, 0, 0.15);
+    }
+
+    /* Logo Badge */
+    .logo-badge {
+      background: var(--cb-yellow);
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 4px 16px rgba(254, 242, 0, 0.4);
+    }
+
+    .logo-dot {
+      color: var(--cb-yellow);
+      text-shadow: 0 0 12px rgba(254, 242, 0, 0.6);
+    }
+
+    /* Floating Navigation */
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+      cursor: pointer;
+    }
+    .nav-dot.active {
+      height: 28px;
+      background: var(--cb-yellow);
+      box-shadow: 0 0 12px rgba(254, 242, 0, 0.6);
+    }
+
+    /* Shimmer Effect */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(1.08); }
+    }
+    .glow-sphere {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: pulseGlow 6s ease-in-out infinite;
+    }
+
+    /* Custom range slider */
+    input[type=range] {
+      accent-color: var(--cb-yellow);
+    }
+  </style>
+</head>
+<body class="bg-[#090A0F] text-[#F8FAFC]">
+
+  <!-- Background Ambient Lights (Parallax) -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div id="orb1" class="glow-sphere bg-[#FEF200] w-[380px] h-[380px] -top-20 -left-20 opacity-25"></div>
+    <div id="orb2" class="glow-sphere bg-[#00E676] w-[420px] h-[420px] bottom-10 -right-20 opacity-20"></div>
+    <div id="orb3" class="glow-sphere bg-[#00B4D8] w-[340px] h-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15"></div>
+  </div>
+
+  <!-- Header Fixo Superior -->
+  <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 border-b border-white/5 bg-[#090A0F]/80 backdrop-blur-md">
+    <div class="flex items-center gap-3 cursor-pointer" onclick="goToSlide(0)">
+      <div class="flex items-center text-2xl font-black tracking-tight">
+        <span class="logo-badge text-xl">Cash</span>
+        <span class="text-white ml-1">Bag</span>
+        <span class="logo-dot text-2xl">.</span>
+      </div>
+      <span class="text-xs font-bold text-[#FEF200] italic hidden sm:inline ml-2">De motoboy para motoboy</span>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <span id="slideCounter" class="text-xs font-mono font-bold tracking-widest text-white/50">01 / 06</span>
+      <a href="https://joaodavidoro-cpu.github.io/CASHBAG/" target="_blank" class="flex items-center gap-2 bg-[#FEF200] hover:bg-[#ffe600] text-black font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow-[0_4px_16px_rgba(254,242,0,0.3)] hover:scale-105 active:scale-95">
+        <span>Abrir App</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Side Navigation Dots -->
+  <div class="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3">
+    <div class="nav-dot active" onclick="goToSlide(0)" title="Apresentação"></div>
+    <div class="nav-dot" onclick="goToSlide(1)" title="Painel & Lucro Real"></div>
+    <div class="nav-dot" onclick="goToSlide(2)" title="Registro Inteligente"></div>
+    <div class="nav-dot" onclick="goToSlide(3)" title="Garagem & Peças"></div>
+    <div class="nav-dot" onclick="goToSlide(4)" title="Orçamentos WhatsApp"></div>
+    <div class="nav-dot" onclick="goToSlide(5)" title="PWA & iPhone"></div>
+  </div>
+
+  <!-- SLIDES DECK -->
+  <main class="slide-deck">
+
+    <!-- ================= SLIDE 1: ABERTURA / BRAND ================= -->
+    <section class="slide active" id="slide-0">
+      <div class="max-w-4xl w-full text-center flex flex-col items-center relative z-10">
+        
+        <!-- Emblema Central 3D -->
+        <div class="parallax-layer mb-6" data-depth="0.08">
+          <div class="inline-flex items-center p-3 sm:p-5 rounded-3xl bg-black/60 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+            <span class="bg-[#FEF200] text-black text-3xl sm:text-5xl font-black px-4 py-2 sm:px-6 sm:py-3 rounded-2xl shadow-[0_6px_24px_rgba(254,242,0,0.45)]">Cash</span>
+            <span class="text-white text-3xl sm:text-5xl font-black ml-2 sm:ml-3">Bag</span>
+            <span class="text-[#FEF200] text-4xl sm:text-6xl font-black leading-none ml-1">.</span>
+          </div>
+        </div>
+
+        <div class="parallax-layer" data-depth="0.04">
+          <span class="inline-block text-[#FEF200] text-sm sm:text-base font-extrabold tracking-wider uppercase bg-[#FEF200]/10 px-4 py-1.5 rounded-full border border-[#FEF200]/30 mb-4">
+            🚀 Dashboard & Gestão Financeira
+          </span>
+          <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-tight mb-4">
+            O controle do seu corre <br class="hidden sm:inline">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FEF200] via-[#FFA633] to-[#FF6600]">
+              na palma da sua mão.
+            </span>
+          </h1>
+          <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8 font-medium">
+            Desenvolvido sob medida para entregadores: calcule seu lucro limpo real, controle a manutenção da sua moto, envie orçamentos e gerencie seu dinheiro.
+          </p>
+        </div>
+
+        <!-- Badges Flutuantes em Parallax -->
+        <div class="parallax-layer grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-2xl" data-depth="0.12">
+          <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl mb-1">⚡</div>
+            <div class="text-xs sm:text-sm font-extrabold text-white">100% Offline</div>
+            <div class="text-[11px] text-slate-400">Funciona sem sinal</div>
+          </div>
+          <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl mb-1">📱</div>
+            <div class="text-xs sm:text-sm font-extrabold text-white">App no iPhone</div>
+            <div class="text-[11px] text-slate-400">PWA sem App Store</div>
+          </div>
+          <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl mb-1">🔒</div>
+            <div class="text-xs sm:text-sm font-extrabold text-white">Privacidade Total</div>
+            <div class="text-[11px] text-slate-400">Dados só no celular</div>
+          </div>
+          <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl mb-1">💰</div>
+            <div class="text-xs sm:text-sm font-extrabold text-white">Zero Mensalidade</div>
+            <div class="text-[11px] text-slate-400">Gratuito para sempre</div>
+          </div>
+        </div>
+
+        <button onclick="nextSlide()" class="mt-8 flex items-center gap-2 text-slate-400 hover:text-[#FEF200] text-sm font-bold transition-colors">
+          <span>Ver Funcionalidades</span>
+          <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 2: PAINEL & LUCRO REAL ================= -->
+    <section class="slide" id="slide-1">
+      <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-5 parallax-layer" data-depth="0.05">
+          <span class="text-xs font-black uppercase tracking-wider text-[#00E676] bg-[#00E676]/10 px-3 py-1 rounded-full border border-[#00E676]/30">
+            📊 Módulo Painel
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-black tracking-tight mt-3 mb-4">
+            Saiba o seu <br>
+            <span class="text-[#00E676]">Lucro Limpo</span> de verdade.
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6 font-medium">
+            Não se iluda apenas com o saldo bruto que o aplicativo mostra na tela. O CashBag desconta automaticamente combustível, estacionamento, lanche e despesas de oficina.
+          </p>
+
+          <div class="space-y-3">
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-[#00E676]/20 text-[#00E676] flex items-center justify-center font-bold text-xs">✓</span>
+              <p class="text-sm text-slate-300 font-semibold">Cálculo de Média por KM rodado e por Hora trabalhada</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-[#00E676]/20 text-[#00E676] flex items-center justify-center font-bold text-xs">✓</span>
+              <p class="text-sm text-slate-300 font-semibold">Separação dos ganhos por plataforma (iFood, Lalamove, Particular)</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-[#00E676]/20 text-[#00E676] flex items-center justify-center font-bold text-xs">✓</span>
+              <p class="text-sm text-slate-300 font-semibold">Filtros rápidos: Todos, Mês atual ou Últimos 7 dias</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup Visual do Painel -->
+        <div class="lg:col-span-7 parallax-layer" data-depth="0.10">
+          <div class="glass-panel p-5 sm:p-6 relative">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+              <div>
+                <span class="text-xs text-slate-400 font-bold uppercase">Saldo Final Limpo</span>
+                <div class="text-3xl sm:text-4xl font-black text-[#00E676] tracking-tight">R$ 2.450,00</div>
+              </div>
+              <div class="text-right">
+                <span class="bg-[#00E676]/15 text-[#00E676] text-xs font-extrabold px-3 py-1 rounded-full border border-[#00E676]/30">
+                  ▲ +78% Margem
+                </span>
+              </div>
+            </div>
+
+            <!-- Mini Grid de Métricas -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="glass-card p-3">
+                <div class="flex justify-between items-center text-xs text-slate-400 font-bold mb-1">
+                  <span>Média / KM</span>
+                  <span class="text-[#FEF200]">➤</span>
+                </div>
+                <div class="text-lg font-black text-white">R$ 2,85 / km</div>
+                <div class="text-[11px] text-slate-500">860 km rodados</div>
+              </div>
+              <div class="glass-card p-3">
+                <div class="flex justify-between items-center text-xs text-slate-400 font-bold mb-1">
+                  <span>Média / Hora</span>
+                  <span class="text-[#FFA633]">⏱</span>
+                </div>
+                <div class="text-lg font-black text-white">R$ 34,20 / h</div>
+                <div class="text-[11px] text-slate-500">71.6h trabalhadas</div>
+              </div>
+            </div>
+
+            <!-- Barras por Plataforma -->
+            <div class="bg-black/40 rounded-xl p-3 border border-white/5 space-y-2">
+              <div class="flex justify-between text-xs font-bold text-slate-300">
+                <span>iFood</span>
+                <span>R$ 1.820,00</span>
+              </div>
+              <div class="h-2 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#FEF200] to-[#FFA633] rounded-full w-[75%]"></div>
+              </div>
+
+              <div class="flex justify-between text-xs font-bold text-slate-300 pt-1">
+                <span>Entregas Particulares</span>
+                <span>R$ 630,00</span>
+              </div>
+              <div class="h-2 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#00E676] to-[#00B4D8] rounded-full w-[38%]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 3: REGISTRO & HISTÓRICO ================= -->
+    <section class="slide" id="slide-2">
+      <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-6 order-2 lg:order-1 parallax-layer" data-depth="0.10">
+          <div class="glass-panel p-6 space-y-4">
+            <div class="flex gap-2 p-1 bg-black/50 rounded-2xl border border-white/5">
+              <button class="flex-1 py-2 text-xs font-extrabold rounded-xl bg-[#12141D] text-[#FEF200] border border-[#FEF200]/30 shadow-md">
+                🏍️ Gasto da Moto
+              </button>
+              <button class="flex-1 py-2 text-xs font-extrabold rounded-xl text-slate-400 hover:text-white">
+                💵 Ganho Extra
+              </button>
+              <button class="flex-1 py-2 text-xs font-extrabold rounded-xl text-slate-400 hover:text-white">
+                👤 Gasto Pessoal
+              </button>
+            </div>
+
+            <!-- Cards de Histórico Coloridos -->
+            <div class="space-y-2">
+              <div class="glass-card p-3 border-l-4 border-l-[#FEF200] flex justify-between items-center">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-white">26/10/2026</span>
+                    <span class="text-[10px] font-black uppercase bg-[#FEF200] text-black px-2 py-0.5 rounded-full">Moto</span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1">112 km · 7.5h · iFood + Lalamove</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-black text-[#00E676]">+ R$ 240,00</div>
+                  <div class="text-[11px] text-[#FF3366]">- R$ 45,00 gas</div>
+                </div>
+              </div>
+
+              <div class="glass-card p-3 border-l-4 border-l-[#00B4D8] flex justify-between items-center">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-white">25/10/2026</span>
+                    <span class="text-[10px] font-black uppercase bg-[#00B4D8] text-white px-2 py-0.5 rounded-full">Pessoal</span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1">Almoço na rua + Água</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-black text-[#FF3366]">- R$ 28,50</div>
+                </div>
+              </div>
+
+              <div class="glass-card p-3 border-l-4 border-l-[#00E676] flex justify-between items-center">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-white">24/10/2026</span>
+                    <span class="text-[10px] font-black uppercase bg-[#00E676] text-black px-2 py-0.5 rounded-full">Extra</span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1">Frete de encomenda urgente</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-black text-[#00E676]">+ R$ 85,00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 order-1 lg:order-2 parallax-layer" data-depth="0.05">
+          <span class="text-xs font-black uppercase tracking-wider text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full border border-[#00B4D8]/30">
+            🗒️ Histórico Visual
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-black tracking-tight mt-3 mb-4">
+            Lançamento em <br>
+            <span class="text-[#00B4D8]">menos de 15 segundos</span>.
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6 font-medium">
+            Quem roda na rua não tem tempo para formulários complicados. O CashBag foi projetado com teclado numérico otimizado, alternância instantânea entre moto e gastos pessoais, e identificação visual por cores.
+          </p>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="border-l-2 border-[#FEF200] pl-3">
+              <div class="text-sm font-extrabold text-white">Borda Amarela</div>
+              <div class="text-xs text-slate-400">Despesas e faturamento da moto</div>
+            </div>
+            <div class="border-l-2 border-[#00B4D8] pl-3">
+              <div class="text-sm font-extrabold text-white">Borda Azul</div>
+              <div class="text-xs text-slate-400">Gastos pessoais do dia a dia</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 4: GARAGEM & MANUTENÇÃO ================= -->
+    <section class="slide" id="slide-3">
+      <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-5 parallax-layer" data-depth="0.05">
+          <span class="text-xs font-black uppercase tracking-wider text-[#FFA633] bg-[#FFA633]/10 px-3 py-1 rounded-full border border-[#FFA633]/30">
+            🔧 Garagem do Motoboy
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-black tracking-tight mt-3 mb-4">
+            Nunca mais esqueça de <br>
+            <span class="text-[#FFA633]">trocar o óleo</span>.
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6 font-medium">
+            Cadastre peças como óleo do motor, pneu traseiro, relação, velas e pastilhas de freio. O app avisa o momento exato de substituir antes de ficar na rua ou estragar o motor.
+          </p>
+
+          <div class="glass-card p-4 border border-[#FFA633]/30">
+            <div class="text-xs font-bold text-[#FFA633] uppercase mb-1">Simulador Interativo:</div>
+            <div class="text-xs text-slate-300 mb-2">Arraste a KM atual para ver o status mudar:</div>
+            <input type="range" id="kmSlider" min="15000" max="18500" value="16200" class="w-full cursor-pointer" oninput="updateKmMockup(this.value)">
+            <div class="flex justify-between text-xs font-mono font-bold text-slate-400 mt-1">
+              <span>15.000 km</span>
+              <span id="kmValue" class="text-[#FEF200]">16.200 km</span>
+              <span>18.500 km</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup Visual de Peças -->
+        <div class="lg:col-span-7 parallax-layer" data-depth="0.10">
+          <div class="glass-panel p-5 sm:p-6 space-y-4">
+            
+            <!-- Item Óleo -->
+            <div class="glass-card p-4">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🛢️</span>
+                  <span class="font-extrabold text-white text-base">Óleo do Motor (10W30)</span>
+                </div>
+                <span id="oleoStatus" class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#00E676]/20 text-[#00E676] border border-[#00E676]/30">
+                  Em dia
+                </span>
+              </div>
+              <div class="h-2.5 rounded-full bg-white/10 overflow-hidden my-2">
+                <div id="oleoBar" class="h-full bg-gradient-to-r from-[#00E676] to-[#FEF200] rounded-full transition-all duration-300 w-[60%]"></div>
+              </div>
+              <div class="flex justify-between text-xs text-slate-400 font-semibold">
+                <span id="oleoRodado">Rodou: 600 km</span>
+                <span>Vida útil: 1.000 km</span>
+              </div>
+            </div>
+
+            <!-- Item Relação -->
+            <div class="glass-card p-4">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">⚙️</span>
+                  <span class="font-extrabold text-white text-base">Kit Relação (Corrente/Coroa)</span>
+                </div>
+                <span class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#FFA633]/20 text-[#FFA633] border border-[#FFA633]/30">
+                  Atenção
+                </span>
+              </div>
+              <div class="h-2.5 rounded-full bg-white/10 overflow-hidden my-2">
+                <div class="h-full bg-gradient-to-r from-[#FEF200] to-[#FFA633] rounded-full w-[82%]"></div>
+              </div>
+              <div class="flex justify-between text-xs text-slate-400 font-semibold">
+                <span>Rodou: 12.300 km</span>
+                <span>Vida útil: 15.000 km</span>
+              </div>
+            </div>
+
+            <!-- Item Pneu Traseiro -->
+            <div class="glass-card p-4">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🏍️</span>
+                  <span class="font-extrabold text-white text-base">Pneu Traseiro Pirelli</span>
+                </div>
+                <span class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#00E676]/20 text-[#00E676] border border-[#00E676]/30">
+                  Em dia
+                </span>
+              </div>
+              <div class="h-2.5 rounded-full bg-white/10 overflow-hidden my-2">
+                <div class="h-full bg-gradient-to-r from-[#00E676] to-[#00B4D8] rounded-full w-[35%]"></div>
+              </div>
+              <div class="flex justify-between text-xs text-slate-400 font-semibold">
+                <span>Rodou: 4.200 km</span>
+                <span>Vida útil: 12.000 km</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 5: ORÇAMENTO & WHATSAPP ================= -->
+    <section class="slide" id="slide-4">
+      <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-6 order-2 lg:order-1 parallax-layer" data-depth="0.10">
+          <div class="glass-panel p-6 space-y-4">
+            
+            <div class="border-b border-white/10 pb-3 flex justify-between items-center">
+              <div>
+                <span class="text-xs text-slate-400 font-bold uppercase">Orçamento Rápido</span>
+                <div class="text-sm font-extrabold text-white">Cliente: Carlos - Loja Central</div>
+              </div>
+              <div class="text-2xl font-black text-[#00E676]" id="orcTotalPreview">R$ 48,00</div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span>Distância: 14 km (R$ 2,50/km)</span>
+                <span class="font-bold">R$ 35,00</span>
+              </div>
+              <div class="flex justify-between text-xs text-slate-300">
+                <span>Pacote Médio (Caixa)</span>
+                <span class="font-bold">R$ 18,00</span>
+              </div>
+              <div class="flex justify-between text-xs text-slate-300">
+                <span>Taxa de Espera: 10 min</span>
+                <span class="font-bold">R$ 5,00</span>
+              </div>
+            </div>
+
+            <!-- Preview da mensagem de WhatsApp -->
+            <div class="bg-[#121B18] border border-[#00E676]/30 rounded-2xl p-4 text-xs font-mono text-slate-300 leading-relaxed space-y-1">
+              <div class="font-bold text-[#00E676] flex items-center gap-1.5">
+                <span>💬 Mensagem Pronta para WhatsApp:</span>
+              </div>
+              <div class="pt-1 text-slate-300">
+                *Orçamento de Entrega — CashBag*<br>
+                👤 Cliente: Carlos - Loja Central<br>
+                📍 Retirada: Av. Brasil, 1200<br>
+                🏁 Entrega: Rua das Flores, 450<br>
+                ➤ Distância: 14 km<br>
+                ⚡ Entrega urgente<br>
+                *💰 Valor total: R$ 48,00*
+              </div>
+            </div>
+
+            <button class="w-full bg-[#00E676] hover:bg-[#00c966] text-black font-extrabold text-xs py-3 rounded-xl transition-all shadow-[0_4px_16px_rgba(0,230,118,0.3)] flex items-center justify-center gap-2">
+              <span>Compartilhar no WhatsApp</span>
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.974.57 1.761.879 2.796.88h.005c3.182 0 5.769-2.587 5.769-5.766.001-3.182-2.585-5.767-5.775-5.767zm7.534 5.766c-.001 4.155-3.381 7.534-7.534 7.534-1.324 0-2.573-.346-3.661-.954l-4.066 1.066 1.085-3.963c-.672-1.121-1.028-2.42-1.027-3.683.002-4.154 3.382-7.534 7.536-7.534 4.154 0 7.533 3.38 7.533 7.534z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 order-1 lg:order-2 parallax-layer" data-depth="0.05">
+          <span class="text-xs font-black uppercase tracking-wider text-[#00E676] bg-[#00E676]/10 px-3 py-1 rounded-full border border-[#00E676]/30">
+            🧾 Módulo Orçamento
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-black tracking-tight mt-3 mb-4">
+            Preço justo em segundos, <br>
+            <span class="text-[#00E676]">sem fazer conta de cabeça</span>.
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6 font-medium">
+            Nunca mais cobre barato demais por esquecer de calcular a volta ou o tempo parado esperando pacote. O gerador de orçamentos calcula taxas de KM, urgência e peso automaticamente.
+          </p>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-[#00E676]/20 text-[#00E676] flex items-center justify-center font-bold">📲</span>
+              <span class="text-sm text-slate-300 font-semibold">Envio com 1 clique direto no WhatsApp do cliente</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-[#00E676]/20 text-[#00E676] flex items-center justify-center font-bold">📋</span>
+              <span class="text-sm text-slate-300 font-semibold">Controle de status: Enviado, Aceito ou Recusado</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 6: PWA & ENCERRAMENTO ================= -->
+    <section class="slide" id="slide-5">
+      <div class="max-w-4xl w-full text-center flex flex-col items-center relative z-10">
+        
+        <div class="parallax-layer mb-6" data-depth="0.08">
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-black border-2 border-white/10 shadow-[0_20px_50px_rgba(254,242,0,0.35)] flex items-center justify-center p-3 relative">
+            <div class="flex items-center text-xl sm:text-2xl font-black">
+              <span class="bg-[#FEF200] text-black px-2.5 py-1 rounded-lg">Cash</span>
+              <span class="text-white ml-1">Bag</span>
+              <span class="text-[#FEF200]">.</span>
+            </div>
+            <span class="absolute -top-2 -right-2 bg-[#00E676] text-black font-black text-[10px] px-2 py-0.5 rounded-full uppercase">PWA</span>
+          </div>
+        </div>
+
+        <div class="parallax-layer" data-depth="0.04">
+          <span class="text-xs font-black uppercase tracking-wider text-[#FEF200] bg-[#FEF200]/10 px-3 py-1 rounded-full border border-[#FEF200]/30">
+            📲 Pronto para Rodar no iPhone
+          </span>
+          <h2 class="text-4xl sm:text-6xl font-black tracking-tight mt-3 mb-4">
+            Instale direto no seu celular. <br>
+            <span class="text-[#FEF200]">Sem pagar mensalidade</span>.
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto mb-8 font-medium">
+            Abra o link oficial no Safari do seu iPhone, toque em <strong>Compartilhar (⎘)</strong> e selecione <strong>Adicionar à Tela de Início</strong>.
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md mx-auto">
+            <a href="https://joaodavidoro-cpu.github.io/CASHBAG/" target="_blank" class="w-full sm:w-auto flex-1 bg-[#FEF200] hover:bg-[#ffe600] text-black font-extrabold text-sm py-3.5 px-6 rounded-2xl transition-all shadow-[0_6px_24px_rgba(254,242,0,0.35)] hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+              <span>Abrir CashBag Agora</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+            
+            <button onclick="goToSlide(0)" class="w-full sm:w-auto py-3.5 px-6 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-extrabold text-sm transition-all border border-white/10">
+              Reiniciar Apresentação ↺
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Barra de Controle Inferior -->
+  <footer class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-black/60 backdrop-blur-xl px-5 py-3 rounded-full border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+    <button onclick="prevSlide()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95" title="Slide Anterior">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+
+    <div class="text-xs font-bold text-slate-400 px-2 flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-[#FEF200] animate-ping"></span>
+      <span>Navegue com as setas ou scroll</span>
+    </div>
+
+    <button onclick="nextSlide()" class="w-9 h-9 rounded-full bg-[#FEF200] text-black flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-[0_0_12px_rgba(254,242,0,0.4)]" title="Próximo Slide">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </footer>
+
+  <!-- Script Parallax & Slider -->
+  <script>
+    let currentSlide = 0;
+    const totalSlides = 6;
+    let isTransitioning = false;
+
+    function updateSlider() {
+      const slides = document.querySelectorAll('.slide');
+      const dots = document.querySelectorAll('.nav-dot');
+      const counter = document.getElementById('slideCounter');
+
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active', 'prev');
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else if (index < currentSlide) {
+          slide.classList.add('prev');
+        }
+      });
+
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+
+      if (counter) {
+        counter.textContent = `0${currentSlide + 1} / 0${totalSlides}`;
+      }
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateSlider();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlider();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlider();
+      }
+    }
+
+    // Teclado
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        prevSlide();
+      }
+    });
+
+    // Roda do Mouse (Wheel) com Throttle
+    let wheelTimeout;
+    window.addEventListener('wheel', (e) => {
+      if (wheelTimeout) return;
+      wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 600);
+      if (e.deltaY > 20) {
+        nextSlide();
+      } else if (e.deltaY < -20) {
+        prevSlide();
+      }
+    }, { passive: true });
+
+    // Touch Swipe para Celular
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const diff = touchStartY - touchEndY;
+      if (diff > 50) nextSlide();
+      else if (diff < -50) prevSlide();
+    }, { passive: true });
+
+    // Mousemove Parallax Effect
+    window.addEventListener('mousemove', (e) => {
+      const cx = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+      const cy = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+
+      // Mover orbs de fundo
+      const orb1 = document.getElementById('orb1');
+      const orb2 = document.getElementById('orb2');
+      if (orb1) orb1.style.transform = `translate3d(${cx * -30}px, ${cy * -30}px, 0)`;
+      if (orb2) orb2.style.transform = `translate3d(${cx * 40}px, ${cy * 40}px, 0)`;
+
+      // Mover elementos parallax do slide atual
+      const activeSlide = document.querySelector('.slide.active');
+      if (activeSlide) {
+        const layers = activeSlide.querySelectorAll('.parallax-layer');
+        layers.forEach((layer) => {
+          const depth = parseFloat(layer.getAttribute('data-depth') || '0.05');
+          const moveX = cx * (depth * 100);
+          const moveY = cy * (depth * 100);
+          layer.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+        });
+      }
+    });
+
+    // Função interativa do slide de peças
+    function updateKmMockup(val) {
+      document.getElementById('kmValue').innerText = Number(val).toLocaleString('pt-BR') + ' km';
+      const dif = val - 15000;
+      const pct = Math.min(100, Math.round((dif / 1000) * 100));
+      
+      const bar = document.getElementById('oleoBar');
+      const status = document.getElementById('oleoStatus');
+      const rodado = document.getElementById('oleoRodado');
+
+      if (rodado) rodado.innerText = `Rodou: ${dif} km`;
+      if (bar) bar.style.width = `${pct}%`;
+
+      if (pct > 90) {
+        status.className = 'text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#FF3366]/20 text-[#FF3366] border border-[#FF3366]/30';
+        status.innerText = 'Vencido!';
+        bar.className = 'h-full bg-gradient-to-r from-[#FF3366] to-[#D81B60] rounded-full transition-all duration-300';
+      } else if (pct > 70) {
+        status.className = 'text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#FFA633]/20 text-[#FFA633] border border-[#FFA633]/30';
+        status.innerText = 'Trocar logo';
+        bar.className = 'h-full bg-gradient-to-r from-[#FEF200] to-[#FFA633] rounded-full transition-all duration-300';
+      } else {
+        status.className = 'text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#00E676]/20 text-[#00E676] border border-[#00E676]/30';
+        status.innerText = 'Em dia';
+        bar.className = 'h-full bg-gradient-to-r from-[#00E676] to-[#FEF200] rounded-full transition-all duration-300';
+      }
+    }
+  </script>
+</body>
+</html>
